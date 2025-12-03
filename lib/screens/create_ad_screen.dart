@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/api_service.dart';
+import '../utils/validators.dart';
 
 class CreateAdScreen extends StatefulWidget {
   const CreateAdScreen({super.key});
@@ -14,6 +16,7 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
+  final _barcodeController = TextEditingController();
   String _selectedCategory = 'Eletrônicos';
   bool _isLoading = false;
 
@@ -32,6 +35,7 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _barcodeController.dispose();
     super.dispose();
   }
 
@@ -84,6 +88,44 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
     }
   }
 
+  Future<void> _buscarProdutoPorBarcode() async {
+    final err = Validators.validateBarcode(_barcodeController.text);
+    if (err != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      return;
+    }
+    try {
+      final data = await ApiService.fetchProductByBarcode(_barcodeController.text);
+      if (data == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produto não encontrado')));
+        }
+        return;
+      }
+      final categoriesText = (data['categories'] ?? '').toString();
+      final firstCategory = categoriesText
+          .split(',')
+          .map((s) => s.trim())
+          .firstWhere((c) => c.isNotEmpty, orElse: () => _selectedCategory);
+      final matchedCategory = _categories.contains(firstCategory) ? firstCategory : _selectedCategory;
+
+      setState(() {
+        _titleController.text = data['name']?.toString() ?? _titleController.text;
+        _selectedCategory = matchedCategory;
+        _descriptionController.text = data['description']?.toString() ?? _descriptionController.text;
+      });
+
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dados preenchidos a partir do código de barras')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro na consulta: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,6 +157,29 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _barcodeController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Código de barras (EAN/UPC)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.qr_code_2),
+                        ),
+                        validator: Validators.validateBarcode,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      onPressed: _buscarProdutoPorBarcode,
+                      icon: const Icon(Icons.search),
+                      label: const Text('Buscar'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(

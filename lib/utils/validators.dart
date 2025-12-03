@@ -53,4 +53,18 @@ class Validators {
     }
     return null;
   }
+  
+  static String? validateCep(String? value) {
+    final v = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (v.isEmpty) return 'Informe o CEP';
+    if (v.length != 8) return 'CEP deve ter 8 dígitos';
+    return null;
+  }
+
+  static String? validateBarcode(String? value) {
+    final v = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (v.isEmpty) return 'Informe o código de barras';
+    if (v.length < 8 || v.length > 14) return 'Código deve ter 8–14 dígitos';
+    return null;
+  }
 }

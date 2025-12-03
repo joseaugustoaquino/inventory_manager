@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:inventory_manager/services/api_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -9,31 +9,8 @@ class StatisticsScreen extends StatefulWidget {
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen>
-    with TickerProviderStateMixin {
+class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _animation;
-  bool _isLoading = true;
-
-  final Map<String, dynamic> _statistics = {
-    'totalAds': 1250,
-    'activeAds': 890,
-    'soldAds': 360,
-    'totalUsers': 5420,
-    'categoriesData': {
-      'Eletrônicos': 320,
-      'Veículos': 180,
-      'Imóveis': 150,
-      'Moda': 220,
-      'Casa e Jardim': 140,
-      'Esportes': 90,
-      'Outros': 150,
-    },
-    'monthlyGrowth': 12.5,
-    'averagePrice': 2850.00,
-  };
-
-  List<Map<String, dynamic>> _externalProducts = [];
 
   @override
   void initState() {
@@ -42,10 +19,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    _loadStatistics();
   }
 
   @override
@@ -54,316 +27,154 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     super.dispose();
   }
 
-  Future<void> _loadStatistics() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    try {
-      _externalProducts = await ApiService.fetchProducts(limit: 3);
-    } catch (_) {
-      _externalProducts = [];
-    }
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-      _animationController.forward();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estatísticas'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _isLoading = true;
-              });
-              _animationController.reset();
-              _loadStatistics();
-            },
-          ),
-        ],
       ),
-      body: _isLoading
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Carregando estatísticas...'),
-                ],
-              ),
-            )
-          : AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _animation.value,
-                  child: Transform.translate(
-                    offset: Offset(0, 50 * (1 - _animation.value)),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatCard(
-                                  'Total de Produtos',
-                                  _statistics['totalAds'].toString(),
-                                  Icons.ads_click,
-                                  Colors.blue,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildStatCard(
-                                  'Produtos Ativos',
-                                  _statistics['activeAds'].toString(),
-                                  Icons.trending_up,
-                                  Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatCard(
-                                  'Vendidos',
-                                  _statistics['soldAds'].toString(),
-                                  Icons.check_circle,
-                                  Colors.orange,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildStatCard(
-                                  'Usuários',
-                                  _statistics['totalUsers'].toString(),
-                                  Icons.people,
-                                  Colors.purple,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Crescimento Mensal',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.trending_up,
-                                        color: Colors.green[600],
-                                        size: 32,
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '+${_statistics['monthlyGrowth']}%',
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green[600],
-                                            ),
-                                          ),
-                                          const Text(
-                                            'Em relação ao mês anterior',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Preço Médio dos Produtos',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.attach_money,
-                                        color: Colors.blue[600],
-                                        size: 32,
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'R\$ ${_statistics['averagePrice'].toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.blue[600],
-                                            ),
-                                          ),
-                                          const Text(
-                                            'Valor médio por produto',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Produtos por Categoria',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ..._statistics['categoriesData'].entries.map(
-                                    (entry) => _buildCategoryBar(
-                                      entry.key,
-                                      entry.value,
-                                      _statistics['totalAds'],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'API Externa (Fakestore)',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (_externalProducts.isEmpty)
-                                    const Text('Falha ao carregar dados externos.')
-                                  else
-                                    ..._externalProducts.map(
-                                      (p) => Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.public, size: 16),
-                                            const SizedBox(width: 8),
-                                            Expanded(child: Text(p['title'] ?? '')),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 900;
+          final isMedium = constraints.maxWidth >= 600 && constraints.maxWidth < 900;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildInventoryStats(isWide: isWide, isMedium: isMedium),
+                const SizedBox(height: 24),
+                _buildCategoryDistribution(isWide: isWide),
+                const SizedBox(height: 24),
+                _buildLowStockList(),
+              ],
             ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildInventoryStats({required bool isWide, required bool isMedium}) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      return const Center(child: Text('Usuário não autenticado'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(uid)
+          .collection('produtos')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+
+        final docs = snapshot.data!.docs;
+        int totalProdutos = docs.length;
+        int quantidadeTotal = 0;
+        double valorTotal = 0;
+        int baixoEstoque = 0;
+
+        for (final d in docs) {
+          final data = d.data() as Map<String, dynamic>;
+          final q = (data['quantity'] ?? 0) as int;
+          final price = ((data['price'] ?? 0) as num).toDouble();
+          final threshold = (data['minStock'] ?? 5) as int;
+
+          quantidadeTotal += q;
+          valorTotal += q * price;
+          if (q <= threshold) baixoEstoque++;
+        }
+
+        final children = [
+          _buildStatCard(title: 'Produtos', value: '$totalProdutos', icon: Icons.inventory_2_outlined),
+          _buildStatCard(title: 'Quantidade total', value: '$quantidadeTotal', icon: Icons.format_list_numbered),
+          _buildStatCard(title: 'Valor total', value: 'R\$ ${valorTotal.toStringAsFixed(2)}', icon: Icons.attach_money),
+          _buildStatCard(title: 'Baixo estoque', value: '$baixoEstoque', icon: Icons.warning_amber_rounded, color: Colors.orange),
+        ];
+
+        if (isWide) {
+          return GridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            crossAxisCount: 4,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.8,
+            children: children,
+          );
+        } else if (isMedium) {
+          return GridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.8,
+            children: children,
+          );
+        } else {
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: children.map((c) => SizedBox(width: MediaQuery.of(context).size.width - 32, child: c)).toList(),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildCategoryDistribution({required bool isWide}) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
     return Card(
+      elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(icon, color: color),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(255),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Icon(
-                    Icons.trending_up,
-                    size: 16,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
+            const Text('Distribuição por Categoria', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('usuarios')
+                  .doc(uid)
+                  .collection('produtos')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('Sem dados de categorias no momento.');
+                }
+
+                final counts = <String, int>{};
+                for (final d in snapshot.data!.docs) {
+                  final data = d.data() as Map<String, dynamic>;
+                  final cat = (data['category'] ?? 'Sem categoria') as String;
+                  counts[cat] = (counts[cat] ?? 0) + 1;
+                }
+
+                final total = counts.values.fold<int>(0, (a, b) => a + b);
+                final items = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+
+                return Column(
+                  children: items.map((e) {
+                    final pct = total > 0 ? (e.value / total) : 0.0;
+                    return _buildCategoryBar(label: e.key, count: e.value, ratio: pct);
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),
@@ -371,33 +182,107 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
-  Widget _buildCategoryBar(String category, int count, int total) {
-    final percentage = (count / total * 100);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLowStockList() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Itens com baixo estoque', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('usuarios')
+                  .doc(uid)
+                  .collection('produtos')
+                  .where('quantity', isLessThanOrEqualTo: 5) // ajuste se usar 'minStock'
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('Nenhum item com baixo estoque.');
+                }
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: snapshot.data!.docs.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    final title = (data['title'] ?? 'Sem título') as String;
+                    final q = (data['quantity'] ?? 0) as int;
+                    final min = (data['minStock'] ?? 5) as int;
+                    return ListTile(
+                      leading: const Icon(Icons.inventory_2),
+                      title: Text(title),
+                      subtitle: Text('Quantidade: $q • Mínimo: $min'),
+                      trailing: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({required String title, required String value, required IconData icon, Color? color}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(category),
-              Text(
-                '$count (${percentage.toStringAsFixed(1)}%)',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          CircleAvatar(
+            backgroundColor: (color ?? Theme.of(context).colorScheme.primary).withValues(alpha: 0.12),
+            child: Icon(icon, color: color ?? Theme.of(context).colorScheme.primary),
           ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: percentage / 100,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).primaryColor,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black54)),
+              const SizedBox(height: 4),
+              Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryBar({required String label, required int count, required double ratio}) {
+    final pctText = '${(ratio * 100).toStringAsFixed(1)}%';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                Container(height: 14, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8))),
+                FractionallySizedBox(
+                  widthFactor: ratio,
+                  child: Container(height: 14, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(8))),
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: 12),
+          SizedBox(width: 120, child: Text('$label ($pctText)', overflow: TextOverflow.ellipsis)),
+          const SizedBox(width: 8),
+          Text('$count'),
         ],
       ),
     );
