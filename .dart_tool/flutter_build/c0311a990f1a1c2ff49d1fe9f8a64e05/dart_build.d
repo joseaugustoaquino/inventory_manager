@@ -1,0 +1,1 @@
+ /Users/projetos03/Documentos/Projects/inventory_manager/.dart_tool/flutter_build/c0311a990f1a1c2ff49d1fe9f8a64e05/dart_build_result.json: 
