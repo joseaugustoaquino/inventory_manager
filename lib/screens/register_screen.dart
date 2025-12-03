@@ -30,16 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -52,15 +42,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       
       if (success) {
-        _showSnackBar('Cadastro realizado com sucesso!');
         if (mounted) { 
           Navigator.pop(context); 
         }
       } else {
-        _showSnackBar(
-          authProvider.errorMessage ?? 'Erro ao cadastrar',
-          isError: true,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Erro ao cadastrar'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

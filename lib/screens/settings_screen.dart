@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:inventory_manager/providers/auth_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -192,33 +193,29 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showChangePasswordDialog(BuildContext context) {
+    final currentPassController = TextEditingController();
+    final newPassController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Alterar Senha'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              controller: currentPassController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Senha Atual',
+              decoration: const InputDecoration(
+                labelText: 'Senha atual',
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextField(
+              controller: newPassController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Nova Senha',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Confirmar Nova Senha',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -230,14 +227,21 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Senha alterada com sucesso!'),
-                  backgroundColor: Colors.green,
-                ),
+              final provider = Provider.of<AuthProvider>(context, listen: false);
+              final ok = await provider.updatePasswordWithReauth(
+                currentPassController.text.trim(),
+                newPassController.text.trim(),
               );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(ok ? 'Senha alterada com sucesso!' : (provider.errorMessage ?? 'Erro ao alterar senha')),
+                    backgroundColor: ok ? Colors.green : Colors.red,
+                  ),
+                );
+              }
             },
             child: const Text('Alterar'),
           ),
@@ -365,10 +369,13 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Provider.of<AuthProvider>(context, listen: false).logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              await FirebaseAuth.instance.signOut();
+              if (context.mounted) {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                Navigator.pushReplacementNamed(context, '/login');
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

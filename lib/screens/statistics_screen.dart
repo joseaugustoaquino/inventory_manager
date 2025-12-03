@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:inventory_manager/services/api_service.dart';
+
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -31,6 +33,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     'averagePrice': 2850.00,
   };
 
+  List<Map<String, dynamic>> _externalProducts = [];
+
   @override
   void initState() {
     super.initState();
@@ -51,8 +55,12 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   }
 
   Future<void> _loadStatistics() async {
-    // Simular carregamento de dados
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      _externalProducts = await ApiService.fetchProducts(limit: 3);
+    } catch (_) {
+      _externalProducts = [];
+    }
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -103,7 +111,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Cards de estatísticas principais
                           Row(
                             children: [
                               Expanded(
@@ -148,7 +155,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             ],
                           ),
                           const SizedBox(height: 24),
-                          // Crescimento mensal
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -197,7 +203,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // Preço médio
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -246,7 +251,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // Distribuição por categoria
                           Card(
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -268,6 +272,40 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                                       _statistics['totalAds'],
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'API Externa (Fakestore)',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  if (_externalProducts.isEmpty)
+                                    const Text('Falha ao carregar dados externos.')
+                                  else
+                                    ..._externalProducts.map(
+                                      (p) => Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.public, size: 16),
+                                            const SizedBox(width: 8),
+                                            Expanded(child: Text(p['title'] ?? '')),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),

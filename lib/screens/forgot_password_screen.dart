@@ -20,16 +20,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -39,15 +29,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       );
       
       if (success) {
-        _showSnackBar('Email de recuperação enviado com sucesso!');
         if (mounted) { 
           Navigator.pop(context);
         }
       } else {
-        _showSnackBar(
-          authProvider.errorMessage ?? 'Erro ao enviar email de recuperação',
-          isError: true,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Erro ao enviar email de recuperação'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

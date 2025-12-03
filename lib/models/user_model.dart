@@ -17,6 +17,7 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
     };
   }
   
@@ -26,6 +27,15 @@ class UserModel {
       name: json['name'],
       email: json['email'],
       phone: json['phone'],
+    );
+  }
+
+  factory UserModel.fromFirestore(Map<String, dynamic> json, String id) {
+    return UserModel(
+      id: id,
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
     );
   }
 }

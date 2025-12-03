@@ -36,9 +36,10 @@ class Validators {
       return 'Telefone é obrigatório';
     }
     // Regex simples para validar telefone brasileiro
-    final phoneRegex = RegExp(r'^\([1-9]{2}\) [9]{0,1}[0-9]{4}-[0-9]{4}$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Digite um telefone válido (ex: (11) 99999-9999)';
+    // Remove tudo que não é dígito e valida apenas os 11 números
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.length != 11) {
+      return 'Digite um telefone válido com 11 dígitos. Ex: (11) 99999-9999';
     }
     return null;
   }

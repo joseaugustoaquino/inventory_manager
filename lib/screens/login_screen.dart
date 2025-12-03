@@ -25,16 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -45,15 +35,18 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       
       if (success) {
-        _showSnackBar('Login realizado com sucesso!');
         if (mounted) { 
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {
-        _showSnackBar(
-          authProvider.errorMessage ?? 'Erro ao fazer login',
-          isError: true,
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Erro ao fazer login'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

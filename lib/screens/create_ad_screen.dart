@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreateAdScreen extends StatefulWidget {
   const CreateAdScreen({super.key});
@@ -41,7 +43,22 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
     });
 
     try {
-      await Future.delayed(const Duration(seconds: 2));
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+      final userAds = FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(uid)
+          .collection('anuncios');
+
+      await userAds.add({
+        'title': _titleController.text.trim(),
+        'titleLowercase': _titleController.text.trim().toLowerCase(),
+        'description': _descriptionController.text.trim(),
+        'price': double.parse(_priceController.text.trim()),
+        'category': _selectedCategory,
+        'categoryLowercase': _selectedCategory.toLowerCase(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
