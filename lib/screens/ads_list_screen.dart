@@ -17,7 +17,7 @@ class AdsListScreen extends StatelessWidget {
     final query = FirebaseFirestore.instance
         .collection('usuarios')
         .doc(uid)
-        .collection('anuncios')
+        .collection('produtos')
         .orderBy('createdAt', descending: true)
         .snapshots();
 
@@ -147,16 +147,16 @@ class AdsListScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _toggleFavorite(BuildContext context, String uid, String adId, Map<String, dynamic> ad) async {
+  Future<void> _toggleFavorite(BuildContext context, String uid, String productId, Map<String, dynamic> ad) async {
     final favs = FirebaseFirestore.instance.collection('usuarios').doc(uid).collection('favoritos');
-    final favDoc = favs.doc(adId);
+    final favDoc = favs.doc(productId);
     final exists = await favDoc.get();
     if (exists.exists) {
       await favDoc.delete();
       DialogHelper.showSnackBar(context, 'Produto removido dos favoritos');
     } else {
       await favDoc.set({
-        'adId': adId,
+        'productId': productId,
         'title': ad['title'],
         'category': ad['category'],
         'price': ad['price'],
@@ -174,7 +174,7 @@ class AdsListScreen extends StatelessWidget {
     );
   }
 
-  void _showAdOptions(BuildContext context, String uid, String adId, Map<String, dynamic> ad) {
+  void _showAdOptions(BuildContext context, String uid, String productId, Map<String, dynamic> ad) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -214,24 +214,16 @@ class AdsListScreen extends StatelessWidget {
                   );
                   if (updated == true) {
                     await FirebaseFirestore.instance
-                        .collection('usuarios').doc(uid).collection('anuncios').doc(adId)
+                        .collection('usuarios').doc(uid).collection('produtos').doc(productId)
                         .update({
                       'title': titleController.text.trim(),
                       'titleLowercase': titleController.text.trim().toLowerCase(),
                       'description': descController.text.trim(),
                       'price': double.tryParse(priceController.text.trim()) ?? ad['price'],
-                      'updatedAt': FieldValue.serverTimestamp(),
+                      'updatedAt': DateTime.now().toUtc().toIso8601String(),
                     });
                     DialogHelper.showSnackBar(context, 'Produto atualizado com sucesso!');
                   }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Compartilhar'),
-                onTap: () {
-                  Navigator.pop(context);
-                  DialogHelper.showSnackBar(context, 'Produto compartilhado com sucesso!');
                 },
               ),
               ListTile(
@@ -246,7 +238,7 @@ class AdsListScreen extends StatelessWidget {
                   );
                   if (confirm == true) {
                     await FirebaseFirestore.instance
-                        .collection('usuarios').doc(uid).collection('anuncios').doc(adId)
+                        .collection('usuarios').doc(uid).collection('produtos').doc(productId)
                         .delete();
                     DialogHelper.showSnackBar(context, 'Produto excluído com sucesso!');
                   }

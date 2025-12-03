@@ -25,12 +25,10 @@ class _SearchScreenState extends State<SearchScreen> {
     final base = FirebaseFirestore.instance
         .collection('usuarios')
         .doc(uid)
-        .collection('anuncios');
+        .collection('produtos');
 
     Query<Map<String, dynamic>> query;
     final qLower = q.toLowerCase();
-
-    // Case-insensitive prefix search on titleLowercase
     query = base.where('titleLowercase', isGreaterThanOrEqualTo: qLower)
                 .where('titleLowercase', isLessThanOrEqualTo: '$qLower\uf8ff');
 

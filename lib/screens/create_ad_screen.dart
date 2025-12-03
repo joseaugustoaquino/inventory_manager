@@ -37,27 +37,24 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
 
   Future<void> _createAd() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() { _isLoading = true; });
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
-      final userAds = FirebaseFirestore.instance
+      final userProducts = FirebaseFirestore.instance
           .collection('usuarios')
           .doc(uid)
-          .collection('anuncios');
+          .collection('produtos');
 
-      await userAds.add({
+      final now = DateTime.now().toUtc();
+      await userProducts.add({
         'title': _titleController.text.trim(),
         'titleLowercase': _titleController.text.trim().toLowerCase(),
         'description': _descriptionController.text.trim(),
         'price': double.parse(_priceController.text.trim()),
         'category': _selectedCategory,
         'categoryLowercase': _selectedCategory.toLowerCase(),
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
       });
       
       if (mounted) {

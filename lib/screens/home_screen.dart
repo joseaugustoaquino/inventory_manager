@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
-            label: 'Anúncios',
+            label: 'Produtos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
