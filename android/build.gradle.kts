@@ -1,3 +1,5 @@
+val ndkVersion by extra("28.2.13676358")
+val compileSdkVersion by extra(35)
 allprojects {
     repositories {
         google()

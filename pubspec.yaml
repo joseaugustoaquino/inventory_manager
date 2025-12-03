@@ -12,8 +12,12 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  provider: ^6.1.1  # Para gerenciamento de estado com ChangeNotifier
-  email_validator: ^2.1.17  # Para validação de email
+  provider: ^6.1.1
+  email_validator: ^2.1.17
+  firebase_core: ^3.4.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
