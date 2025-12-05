@@ -51,9 +51,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Recuperar Senha'),
-        backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: SafeArea(
         child: SingleChildScrollView(

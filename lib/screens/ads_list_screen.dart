@@ -24,8 +24,8 @@ class AdsListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lista de Produtos'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

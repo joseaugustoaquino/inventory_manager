@@ -32,6 +32,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estatísticas'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

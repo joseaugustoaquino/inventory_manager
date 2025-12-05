@@ -28,20 +28,37 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Inventory Manager',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(
-            elevation: 2,
-            centerTitle: true,
-          ),
-          cardTheme: CardThemeData(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        theme: (() {
+          final colorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+          return ThemeData(
+            useMaterial3: true,
+            colorScheme: colorScheme,
+            primaryColor: colorScheme.primary,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            appBarTheme: AppBarTheme(
+              elevation: 2,
+              centerTitle: true,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
             ),
-          ),
-        ),
+            cardTheme: CardThemeData(
+              elevation: 4, 
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
+            ),
+            floatingActionButtonTheme: FloatingActionButtonThemeData(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+            ),
+          );
+        })(),
         initialRoute: '/',
         routes: {
           '/': (context) => Consumer<AuthProvider>(
