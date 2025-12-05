@@ -115,10 +115,24 @@ class AdsListScreen extends StatelessWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.favorite_border),
-                        onPressed: () async {
-                          await _toggleFavorite(context, uid, doc.id, ad);
+                      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                        stream: FirebaseFirestore.instance
+                            .collection('usuarios')
+                            .doc(uid)
+                            .collection('favoritos')
+                            .doc(doc.id)
+                            .snapshots(),
+                        builder: (context, favSnapshot) {
+                          final isFav = favSnapshot.hasData && favSnapshot.data!.exists;
+                          return IconButton(
+                            icon: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              color: isFav ? Colors.red : null,
+                            ),
+                            onPressed: () async {
+                              await _toggleFavorite(context, uid, doc.id, ad);
+                            },
+                          );
                         },
                       ),
                       IconButton(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:inventory_manager/providers/auth_provider.dart';
 import 'package:inventory_manager/screens/ads_list_screen.dart';
 import 'package:inventory_manager/screens/favorites_screen.dart';
@@ -72,12 +73,10 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    
+  Widget build(BuildContext context) {    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inventory Manager'),
+        title: const Text('Início'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -88,152 +87,14 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Saudação do usuário
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          child: Text(
-                            authProvider.currentUser?.name.substring(0, 1).toUpperCase() ?? 'U',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Olá, ${authProvider.currentUser?.name ?? 'Usuário'}!',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Text(
-                                'Bem-vindo ao Fab Ads',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Ações rápidas
-                const Text(
-                  'Ações Rápidas',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  children: [
-                    _buildQuickActionCard(
-                      context,
-                      'Criar Anúncio',
-                      Icons.add_circle,
-                      Colors.green,
-                      () => Navigator.pushNamed(context, '/create-ad'),
-                    ),
-                    _buildQuickActionCard(
-                      context,
-                      'Ver Anúncios',
-                      Icons.list,
-                      Colors.blue,
-                      () => Navigator.pushNamed(context, '/ads-list'),
-                    ),
-                    _buildQuickActionCard(
-                      context,
-                      'Favoritos',
-                      Icons.favorite,
-                      Colors.red,
-                      () => Navigator.pushNamed(context, '/favorites'),
-                    ),
-                    _buildQuickActionCard(
-                      context,
-                      'Estatísticas',
-                      Icons.bar_chart,
-                      Colors.purple,
-                      () => Navigator.pushNamed(context, '/statistics'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Resumo de atividades
-                const Text(
-                  'Resumo de Atividades',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Meus Anúncios',
-                        '12',
-                        Icons.ads_click,
-                        Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Favoritos',
-                        '5',
-                        Icons.favorite,
-                        Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Visualizações',
-                        '234',
-                        Icons.visibility,
-                        Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        'Mensagens',
-                        '8',
-                        Icons.message,
-                        Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(16),
+              child:  _body(context),
+            )
           ),
         ),
       ),
@@ -243,6 +104,197 @@ class HomePage extends StatelessWidget {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _body(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final uid = authProvider.currentUser?.id;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Saudação do usuário
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: Text(
+                    authProvider.currentUser?.name.substring(0, 1).toUpperCase() ?? 'U',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Olá, ${authProvider.currentUser?.name ?? 'Usuário'}!'.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        'Bem-vindo ao Fab Ads',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Ações rápidas
+        const Text(
+          'Ações Rápidas',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          children: [
+            _buildQuickActionCard(
+              context,
+              'Criar Produto',
+              Icons.add_circle,
+              Colors.green,
+              () => Navigator.pushNamed(context, '/create-ad'),
+            ),
+            _buildQuickActionCard(
+              context,
+              'Ver Produto',
+              Icons.list,
+              Colors.blue,
+              () => Navigator.pushNamed(context, '/ads-list'),
+            ),
+            _buildQuickActionCard(
+              context,
+              'Favoritos',
+              Icons.favorite,
+              Colors.red,
+              () => Navigator.pushNamed(context, '/favorites'),
+            ),
+            _buildQuickActionCard(
+              context,
+              'Estatísticas',
+              Icons.bar_chart,
+              Colors.purple,
+              () => Navigator.pushNamed(context, '/statistics'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        // Resumo de atividades
+        const Text(
+          'Resumo de Atividades',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: uid == null
+                  ? _buildSummaryCard(
+                      'Meus Produtos',
+                      '0',
+                      Icons.ads_click,
+                      Colors.orange,
+                    )
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('usuarios')
+                          .doc(uid)
+                          .collection('produtos')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _buildSummaryCard(
+                            'Meus Produtos',
+                            '—',
+                            Icons.ads_click,
+                            Colors.orange,
+                          );
+                        }
+                        if (!snapshot.hasData) {
+                          return _buildSummaryCard(
+                            'Meus Produtos',
+                            '…',
+                            Icons.ads_click,
+                            Colors.orange,
+                          );
+                        }
+                        final count = snapshot.data!.docs.length;
+                        return _buildSummaryCard(
+                          'Meus Produtos',
+                          count.toString(),
+                          Icons.ads_click,
+                          Colors.orange,
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: uid == null
+                  ? _buildSummaryCard(
+                      'Favoritos',
+                      '0',
+                      Icons.favorite,
+                      Colors.red,
+                    )
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('usuarios')
+                          .doc(uid)
+                          .collection('favoritos')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _buildSummaryCard(
+                            'Favoritos',
+                            '—',
+                            Icons.favorite,
+                            Colors.red,
+                          );
+                        }
+                        if (!snapshot.hasData) {
+                          return _buildSummaryCard(
+                            'Favoritos',
+                            '…',
+                            Icons.favorite,
+                            Colors.red,
+                          );
+                        }
+                        final count = snapshot.data!.docs.length;
+                        return _buildSummaryCard(
+                          'Favoritos',
+                          count.toString(),
+                          Icons.favorite,
+                          Colors.red,
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

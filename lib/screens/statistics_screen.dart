@@ -40,15 +40,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildInventoryStats(isWide: isWide, isMedium: isMedium),
-                const SizedBox(height: 24),
-                _buildCategoryDistribution(isWide: isWide),
-                const SizedBox(height: 24),
-                _buildLowStockList(),
-              ],
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildInventoryStats(isWide: isWide, isMedium: isMedium),
+                    const SizedBox(height: 24),
+                    _buildCategoryDistribution(isWide: isWide),
+                    const SizedBox(height: 24),
+                    _buildLowStockList(),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -104,7 +109,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
           return GridView.count(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            crossAxisCount: 4,
+            crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
             childAspectRatio: 2.8,

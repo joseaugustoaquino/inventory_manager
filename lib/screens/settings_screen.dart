@@ -13,182 +13,193 @@ class SettingsScreen extends StatelessWidget {
         title: const Text('Configurações'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: ListView(
-        children: [
-          const SizedBox(height: 16),
-          // Seção do Perfil
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Perfil',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: _body(context),
           ),
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Editar Perfil'),
-                  subtitle: const Text('Alterar informações pessoais'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Funcionalidade em desenvolvimento'),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.lock),
-                  title: const Text('Alterar Senha'),
-                  subtitle: const Text('Modificar sua senha de acesso'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showChangePasswordDialog(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Seção de Notificações
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Notificações',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.notifications),
-                  title: const Text('Notificações Push'),
-                  subtitle: const Text('Receber notificações no dispositivo'),
-                  value: true,
-                  onChanged: (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          value ? 'Notificações ativadas' : 'Notificações desativadas',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                SwitchListTile(
-                  secondary: const Icon(Icons.email),
-                  title: const Text('Notificações por Email'),
-                  subtitle: const Text('Receber emails sobre novos produtos'),
-                  value: false,
-                  onChanged: (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          value ? 'Emails ativados' : 'Emails desativados',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Seção de Privacidade
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Privacidade e Segurança',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.privacy_tip),
-                  title: const Text('Política de Privacidade'),
-                  subtitle: const Text('Leia nossa política de privacidade'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showPrivacyPolicy(context);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.security),
-                  title: const Text('Termos de Uso'),
-                  subtitle: const Text('Consulte os termos de uso'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showTermsOfUse(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Seção de Conta
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Conta',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.help),
-                  title: const Text('Ajuda e Suporte'),
-                  subtitle: const Text('Obtenha ajuda ou entre em contato'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showHelpDialog(context);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Sair da Conta',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  subtitle: const Text('Fazer logout do aplicativo'),
-                  onTap: () {
-                    _showLogoutDialog(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _body(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        // Seção do Perfil
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Perfil',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Editar Perfil'),
+                subtitle: const Text('Alterar informações pessoais'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Funcionalidade em desenvolvimento'),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.lock),
+                title: const Text('Alterar Senha'),
+                subtitle: const Text('Modificar sua senha de acesso'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  _showChangePasswordDialog(context);
+                },
+              ),
+            ],
+          ),
+        ),
+        // Seção de Notificações
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Notificações',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(Icons.notifications),
+                title: const Text('Notificações Push'),
+                subtitle: const Text('Receber notificações no dispositivo'),
+                value: true,
+                onChanged: (value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value ? 'Notificações ativadas' : 'Notificações desativadas',
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                secondary: const Icon(Icons.email),
+                title: const Text('Notificações por Email'),
+                subtitle: const Text('Receber emails sobre novos produtos'),
+                value: false,
+                onChanged: (value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value ? 'Emails ativados' : 'Emails desativados',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        // Seção de Privacidade
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Privacidade e Segurança',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.privacy_tip),
+                title: const Text('Política de Privacidade'),
+                subtitle: const Text('Leia nossa política de privacidade'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  _showPrivacyPolicy(context);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.security),
+                title: const Text('Termos de Uso'),
+                subtitle: const Text('Consulte os termos de uso'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  _showTermsOfUse(context);
+                },
+              ),
+            ],
+          ),
+        ),
+        // Seção de Conta
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Conta',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.help),
+                title: const Text('Ajuda e Suporte'),
+                subtitle: const Text('Obtenha ajuda ou entre em contato'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  _showHelpDialog(context);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text(
+                  'Sair da Conta',
+                  style: TextStyle(color: Colors.red),
+                ),
+                subtitle: const Text('Fazer logout do aplicativo'),
+                onTap: () {
+                  _showLogoutDialog(context);
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
